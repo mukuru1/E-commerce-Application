@@ -10,6 +10,7 @@ const Navbar = () => {
     <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
       <div className="flex gap-4">
         <Link to="/products" className="font-bold">E-Commerce</Link>
+        <Link to={isAuthenticated ? "/dashboard" : "/login"} className="">Dashboard</Link>
         <Link to="/cart">Cart ({cart.length})</Link>
         <Link to="/wishlist">Wishlist ({wishlist.length})</Link>
       </div>

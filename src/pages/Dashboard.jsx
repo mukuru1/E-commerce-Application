@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
   const { products: allProducts, fetchProducts } = useProduct();
+  const { isAuthenticated } = useAuth();
   const [products, setProducts] = useState([]);
   const [newTitle, setNewTitle] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
@@ -48,21 +51,28 @@ const Dashboard = () => {
       <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
       {/* Add Product */}
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="New product title"
-          className="border p-2 rounded w-full"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-        />
-        <button
-          onClick={addProduct}
-          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-        >
-          Add
-        </button>
-      </div>
+      {!isAuthenticated ? (
+        <div className="mb-4">
+          <p className="mb-2 text-red-600">You must be logged in to manage products.</p>
+          <Link to="/login" className="text-blue-600 hover:underline">Login to continue</Link>
+        </div>
+      ) : (
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            placeholder="New product title"
+            className="border p-2 rounded w-full"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+          />
+          <button
+            onClick={addProduct}
+            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+          >
+            Add
+          </button>
+        </div>
+      )}
 
       {/* Products */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -70,18 +80,24 @@ const Dashboard = () => {
           <div key={p.id} className="bg-white p-4 rounded shadow flex flex-col">
             <h2 className="font-bold">{p.title}</h2>
             <div className="mt-2 flex gap-2">
-              <button
-                className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                onClick={() => openEdit(p)}
-              >
-                Edit
-              </button>
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                onClick={() => deleteProduct(p.id)}
-              >
-                Delete
-              </button>
+              {isAuthenticated ? (
+                <>
+                  <button
+                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    onClick={() => openEdit(p)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    onClick={() => deleteProduct(p.id)}
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : (
+                <span className="text-sm text-gray-500">Login to edit</span>
+              )}
             </div>
           </div>
         ))}
