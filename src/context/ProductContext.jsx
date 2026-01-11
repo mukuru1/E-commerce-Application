@@ -7,8 +7,15 @@ const ProductContext = createContext();
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [cart, setCart] = useState(JSON.parse(localStorage.getItem("cart")) || []);
-  const [wishlist, setWishlist] = useState(JSON.parse(localStorage.getItem("wishlist")) || []);
+  const getStoredUser = () => JSON.parse(localStorage.getItem("user")) || null;
+  const cartKeyFor = (user) => (user && user.username ? `cart:${user.username}` : "cart:guest");
+  const wishlistKeyFor = (user) => (user && user.username ? `wishlist:${user.username}` : "wishlist:guest");
+
+  const loadCartFor = (user) => JSON.parse(localStorage.getItem(cartKeyFor(user))) || [];
+  const loadWishlistFor = (user) => JSON.parse(localStorage.getItem(wishlistKeyFor(user))) || [];
+
+  const [cart, setCart] = useState(() => loadCartFor(getStoredUser()));
+  const [wishlist, setWishlist] = useState(() => loadWishlistFor(getStoredUser()));
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("");
@@ -62,6 +69,28 @@ export const ProductProvider = ({ children }) => {
     fetchCategories();
   }, []);
 
+  // Listen for login/logout events to load the appropriate per-user storage
+  useEffect(() => {
+    const handleLogin = (e) => {
+      const user = (e && e.detail && e.detail.user) || getStoredUser();
+      setCart(loadCartFor(user));
+      setWishlist(loadWishlistFor(user));
+    };
+
+    const handleLogout = () => {
+      // on logout, load guest cart/wishlist (do not delete per-user storage)
+      setCart(loadCartFor(null));
+      setWishlist(loadWishlistFor(null));
+    };
+
+    window.addEventListener("user-login", handleLogin);
+    window.addEventListener("user-logout", handleLogout);
+    return () => {
+      window.removeEventListener("user-login", handleLogin);
+      window.removeEventListener("user-logout", handleLogout);
+    };
+  }, []);
+
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory, sortBy, order]);
@@ -74,7 +103,8 @@ export const ProductProvider = ({ children }) => {
     }
     const updatedCart = [...cart, { ...product, quantity: 1 }];
     setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    const user = getStoredUser();
+    localStorage.setItem(cartKeyFor(user), JSON.stringify(updatedCart));
     toast.success("Added to cart");
   };
 
@@ -86,7 +116,8 @@ export const ProductProvider = ({ children }) => {
     }
     const updatedWishlist = [...wishlist, product];
     setWishlist(updatedWishlist);
-    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+    const user = getStoredUser();
+    localStorage.setItem(wishlistKeyFor(user), JSON.stringify(updatedWishlist));
     toast.success("Added to wishlist");
   };
 
@@ -94,7 +125,8 @@ export const ProductProvider = ({ children }) => {
   const removeFromCart = (id) => {
     const updatedCart = cart.filter((p) => p.id !== id);
     setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    const user = getStoredUser();
+    localStorage.setItem(cartKeyFor(user), JSON.stringify(updatedCart));
     toast.success("Removed from cart");
   };
 
@@ -102,7 +134,8 @@ export const ProductProvider = ({ children }) => {
   const removeFromWishlist = (id) => {
     const updatedWishlist = wishlist.filter((p) => p.id !== id);
     setWishlist(updatedWishlist);
-    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+    const user = getStoredUser();
+    localStorage.setItem(wishlistKeyFor(user), JSON.stringify(updatedWishlist));
     toast.success("Removed from wishlist");
   };
 
