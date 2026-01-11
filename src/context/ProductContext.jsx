@@ -21,11 +21,10 @@ export const ProductProvider = ({ children }) => {
   const [sortBy, setSortBy] = useState("");
   const [order, setOrder] = useState("asc");
 
-  // ✅ Fetch all categories safely
   const fetchCategories = async () => {
     try {
       const res = await axios.get("/products/categories");
-      // DummyJSON now returns array of objects [{ slug, name, url }]
+  
       if (Array.isArray(res.data)) {
         setCategories(res.data);
       } else if (Array.isArray(res.data.categories)) {
@@ -39,18 +38,15 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  // ✅ Fetch products based on selected category, sort, order
   const fetchProducts = async () => {
     try {
       setLoading(true);
       let url = "/products";
 
-      // category selection
       if (selectedCategory !== "all") {
         url = `/products/category/${selectedCategory}`;
       }
 
-      // sorting
       const sortQuery = sortBy ? `?sortBy=${sortBy}&order=${order}` : "";
       const res = await axios.get(`${url}${sortQuery}`);
 
@@ -95,7 +91,6 @@ export const ProductProvider = ({ children }) => {
     fetchProducts();
   }, [selectedCategory, sortBy, order]);
 
-  // ✅ Add to cart
   const addToCart = (product) => {
     if (cart.find((p) => p.id === product.id)) {
       toast.error("Product already in cart");
@@ -108,7 +103,6 @@ export const ProductProvider = ({ children }) => {
     toast.success("Added to cart");
   };
 
-  // ✅ Add to wishlist
   const addToWishlist = (product) => {
     if (wishlist.find((p) => p.id === product.id)) {
       toast.error("Product already in wishlist");
@@ -121,7 +115,6 @@ export const ProductProvider = ({ children }) => {
     toast.success("Added to wishlist");
   };
 
-  // ✅ Remove from cart
   const removeFromCart = (id) => {
     const updatedCart = cart.filter((p) => p.id !== id);
     setCart(updatedCart);
@@ -130,7 +123,6 @@ export const ProductProvider = ({ children }) => {
     toast.success("Removed from cart");
   };
 
-  // ✅ Remove from wishlist
   const removeFromWishlist = (id) => {
     const updatedWishlist = wishlist.filter((p) => p.id !== id);
     setWishlist(updatedWishlist);
