@@ -36,6 +36,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = (username, password) => {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const exists = users.find((u) => u.username === username);
+    if (exists) {
+      toast.error("Username already exists");
+      return;
+    }
+
+    users.push({ username, password });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    const token = `local-${Date.now()}`;
+    localStorage.setItem("token", token);
+    const userObj = { username };
+    localStorage.setItem("user", JSON.stringify(userObj));
+    setUser(userObj);
+    toast.success("Registered and logged in!");
+    navigate("/dashboard");
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -45,7 +65,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, register, isAuthenticated: Boolean(user) }}
+    >
       {children}
     </AuthContext.Provider>
   );
