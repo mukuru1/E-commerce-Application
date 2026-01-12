@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; 
+import { FiEdit, FiTrash } from "react-icons/fi";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
@@ -11,7 +12,6 @@ const Dashboard = () => {
   const [editedTitle, setEditedTitle] = useState("");
   const [loading, setLoading] = useState(false);
 
-  
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -26,12 +26,10 @@ const Dashboard = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  
   const addProduct = async () => {
     if (!newTitle.trim()) return toast.error("Enter a product title");
 
@@ -41,7 +39,6 @@ const Dashboard = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newTitle,
-          
         }),
       });
 
@@ -55,7 +52,6 @@ const Dashboard = () => {
     }
   };
 
-  
   const saveEdit = async () => {
     try {
       const res = await fetch(`https://dummyjson.com/products/${editingProduct.id}`, {
@@ -78,7 +74,6 @@ const Dashboard = () => {
     }
   };
 
-  
   const deleteProduct = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
@@ -95,7 +90,6 @@ const Dashboard = () => {
     }
   };
 
-  
   const openEdit = (product) => {
     setEditingProduct(product);
     setEditedTitle(product.title);
@@ -141,27 +135,40 @@ const Dashboard = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((p) => (
-              <div key={p.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 flex flex-col">
-                <h2 className="font-bold text-lg mb-4 text-slate-800 line-clamp-2 flex-1">{p.title}</h2>
-                <div className="flex gap-2">
-                  {isAuthenticated ? (
-                    <>
-                      <button
-                        className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
-                        onClick={() => openEdit(p)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
-                        onClick={() => deleteProduct(p.id)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  ) : (
-                    <span className="text-sm text-slate-500 text-center w-full py-2">Login to edit</span>
-                  )}
+              <div key={p.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+                {p.thumbnail && (
+                  <div className="w-full h-48 bg-slate-200 overflow-hidden">
+                    <img
+                      src={p.thumbnail}
+                      alt={p.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="p-6 flex flex-col flex-1">
+                  <h2 className="font-bold text-lg mb-4 text-slate-800 line-clamp-2 flex-1">{p.title}</h2>
+                  <div className="flex gap-2">
+                    {isAuthenticated ? (
+                      <>
+                        <button
+                          className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
+                          onClick={() => openEdit(p)}
+                          title="Edit product"
+                        >
+                          <FiEdit size={18} />
+                        </button>
+                        <button
+                          className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
+                          onClick={() => deleteProduct(p.id)}
+                          title="Delete product"
+                        >
+                          <FiTrash size={18} />
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-sm text-slate-500 text-center w-full py-2">Login to edit</span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
