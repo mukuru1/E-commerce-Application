@@ -1,5 +1,6 @@
 # E-Commerce Application — README
 
+**Deployment Link: https://solvite-e-commerce-application.netlify.app: /**
 **Project Overview**
 - **Purpose:** A small React + Vite e-commerce front-end demonstrating product fetching, per-user cart/wishlist persistence, and a simple local + backend authentication flow.
 - **Stack:** React, React Router, Context API (`useContext`), Axios, Tailwind CSS, `react-hot-toast`.
