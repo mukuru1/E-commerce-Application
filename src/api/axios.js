@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
 
-// Add Authorization header automatically if token exists
+
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {

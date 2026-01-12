@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     setLoading(true);
     try {
-      // first, check for locally registered users stored in localStorage
+      
       const users = JSON.parse(localStorage.getItem("users")) || [];
       const localUser = users.find(
         (u) => u.username === username && u.password === password
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // fallback to backend login if local user not found
+      
       const res = await axios.post("/auth/login", {
         username,
         password,
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         try {
           window.dispatchEvent(new CustomEvent("user-login", { detail: { user: res.data.user } }));
         } catch (e) {}
-        navigate("/dashboard"); // redirect to dashboard
+        navigate("/dashboard"); 
       } else {
         toast.error("Login failed!");
       }
@@ -87,11 +87,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    // notify other parts of the app (e.g., ProductContext) to clear their in-memory state
+    
     try {
       window.dispatchEvent(new Event("user-logout"));
     } catch (e) {
-      // ignore if window isn't available
+      
     }
     navigate("/login");
     toast.success("Logged out successfully");

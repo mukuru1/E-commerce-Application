@@ -22,7 +22,7 @@ const Products = () => {
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Products</h1>
 
-      {/* ---------- CATEGORIES ---------- */}
+      
       <div className="flex gap-2 mb-4 flex-wrap">
         <button
           onClick={() => setSelectedCategory("all")}
@@ -33,7 +33,7 @@ const Products = () => {
           All
         </button>
 
-        {/* Each category is now an object: {slug, name, url} */}
+        
         {categories.map((cat) => (
           <button
             key={cat.slug}
@@ -49,7 +49,7 @@ const Products = () => {
         ))}
       </div>
 
-      {/* ---------- SORTING ---------- */}
+      
       <div className="flex gap-2 mb-6">
         <select
           value={sortBy}
@@ -72,7 +72,7 @@ const Products = () => {
         </select>
       </div>
 
-      {/* ---------- PRODUCTS GRID ---------- */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.length === 0 && (
           <p className="text-center col-span-full text-gray-600">
