@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; 
+import { FiEdit, FiTrash } from "react-icons/fi";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
@@ -147,16 +148,18 @@ const Dashboard = () => {
                   {isAuthenticated ? (
                     <>
                       <button
-                        className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
                         onClick={() => openEdit(p)}
+                        title="Edit product"
                       >
-                        Edit
+                        <FiEdit size={18} />
                       </button>
                       <button
-                        className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
                         onClick={() => deleteProduct(p.id)}
+                        title="Delete product"
                       >
-                        Delete
+                        <FiTrash size={18} />
                       </button>
                     </>
                   ) : (
