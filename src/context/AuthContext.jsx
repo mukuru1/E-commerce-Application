@@ -54,17 +54,17 @@ export const AuthProvider = ({ children }) => {
         console.warn("API login failed, checking local storage users...");
       }
 
-      // If API login fails, check the stored users in local storage
+      
       const storedUsers = JSON.parse(localStorage.getItem("all_users")) || [];
       const localUser = storedUsers.find(
         (u) => u.username === username && u.password === password
       );
 
       if (localUser) {
-        // Mock a token for local login
+        
         const token = `local-${Date.now()}`;
         localStorage.setItem("token", token);
-        // Include properties expected by the app
+      
         const userObj = { ...localUser, token };
         localStorage.setItem("user", JSON.stringify(userObj));
         setUser(userObj);

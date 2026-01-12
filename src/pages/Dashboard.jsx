@@ -102,94 +102,100 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-slate-800">Product Dashboard</h1>
 
-      {!isAuthenticated ? (
-        <div className="mb-4">
-          <p className="mb-2 text-red-600">You must be logged in to manage products.</p>
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login to continue
-          </Link>
-        </div>
-      ) : (
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            placeholder="New product title"
-            className="border p-2 rounded w-full"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
-          <button
-            onClick={addProduct}
-            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-          >
-            Add
-          </button>
-        </div>
-      )}
-
-      {loading ? (
-        <p>Loading products...</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {products.map((p) => (
-            <div key={p.id} className="bg-white p-4 rounded shadow flex flex-col">
-              <h2 className="font-bold text-lg mb-2">{p.title}</h2>
-              <div className="flex gap-2 mt-auto">
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                      onClick={() => openEdit(p)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                      onClick={() => deleteProduct(p.id)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                ) : (
-                  <span className="text-sm text-gray-500">Login to edit</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      
-      {editingProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow w-full max-w-sm">
-            <h2 className="text-xl font-bold mb-3">Edit Product</h2>
-            <input
-              type="text"
-              className="w-full border p-2 rounded mb-3"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
+        {!isAuthenticated ? (
+          <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <p className="mb-3 text-slate-600 font-medium">You must be logged in to manage products.</p>
+            <Link to="/login" className="inline-block bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200">
+              Login to continue
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h2 className="text-xl font-bold text-slate-800 mb-4">Add New Product</h2>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Enter product title"
+                className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
               <button
-                className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
-                onClick={() => setEditingProduct(null)}
+                onClick={addProduct}
+                className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-sm"
               >
-                Cancel
-              </button>
-              <button
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                onClick={saveEdit}
-              >
-                Save
+                Add Product
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-slate-600 font-medium">Loading products...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((p) => (
+              <div key={p.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 flex flex-col">
+                <h2 className="font-bold text-lg mb-4 text-slate-800 line-clamp-2 flex-1">{p.title}</h2>
+                <div className="flex gap-2">
+                  {isAuthenticated ? (
+                    <>
+                      <button
+                        className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        onClick={() => openEdit(p)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        onClick={() => deleteProduct(p.id)}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-sm text-slate-500 text-center w-full py-2">Login to edit</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {editingProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+              <h2 className="text-2xl font-bold mb-6 text-slate-800">Edit Product</h2>
+              <input
+                type="text"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  onClick={() => setEditingProduct(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  onClick={saveEdit}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

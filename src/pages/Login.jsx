@@ -32,57 +32,78 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={isRegister ? handleRegister : handleSubmit}
-        className="bg-white p-6 rounded shadow w-full max-w-sm"
-      >
-        <h1 className="text-2xl font-bold mb-4">
-          {isRegister ? "Register" : "Login"}
-        </h1>
-        <input
-          type="text"
-          placeholder="Username"
-          className="border p-2 rounded w-full mb-3"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="border p-2 rounded w-full mb-3"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {isRegister && (
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            className="border p-2 rounded w-full mb-3"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        )}
-
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 w-full"
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-100 to-slate-200">
+      <div className="w-full max-w-md px-4">
+        <form
+          onSubmit={isRegister ? handleRegister : handleSubmit}
+          className="bg-white p-8 rounded-2xl shadow-xl"
         >
-          {isRegister ? "Create account" : "Login"}
-        </button>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">
+              {isRegister ? "Create Account" : "Welcome Back"}
+            </h1>
+            <p className="text-slate-600">
+              {isRegister ? "Sign up to get started" : "Login to continue"}
+            </p>
+          </div>
 
-        <div className="text-center mt-4">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">Username</label>
+              <input
+                type="text"
+                placeholder="Enter your username"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-medium mb-2">Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            {isRegister && (
+              <div>
+                <label className="block text-slate-700 font-medium mb-2">Confirm Password</label>
+                <input
+                  type="password"
+                  placeholder="Confirm your password"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
           <button
-            type="button"
-            onClick={() => setIsRegister(!isRegister)}
-            className="text-sm text-blue-600 hover:underline"
+            type="submit"
+            className="w-full mt-6 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-bold px-4 py-3 rounded-lg transition-all duration-200 shadow-md"
           >
-            {isRegister
-              ? "Already have an account? Login"
-              : "Don't have an account? Register"}
+            {isRegister ? "Create Account" : "Login"}
           </button>
-        </div>
-      </form>
+
+          <div className="text-center mt-6">
+            <button
+              type="button"
+              onClick={() => setIsRegister(!isRegister)}
+              className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+            >
+              {isRegister
+                ? "Already have an account? Login"
+                : "Don't have an account? Register"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
