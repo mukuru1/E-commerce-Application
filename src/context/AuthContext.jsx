@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "../api/axios";
@@ -10,51 +10,75 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch and store all users in local storage on mount
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      try {
+        const storedUsers = localStorage.getItem("all_users");
+        if (!storedUsers) {
+          const res = await axios.get("/users?limit=0");
+          if (res.data && res.data.users) {
+            localStorage.setItem("all_users", JSON.stringify(res.data.users));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+      }
+    };
+    fetchAllUsers();
+  }, []);
+
   const login = async (username, password) => {
     setLoading(true);
     try {
-      // first, check for locally registered users stored in localStorage
-      const users = JSON.parse(localStorage.getItem("users")) || [];
-      const localUser = users.find(
+      // First, try to authenticate with DummyJSON API
+      try {
+        const res = await axios.post("/auth/login", {
+          username,
+          password,
+          expiresInMins: 60,
+        });
+
+        if (res.data && res.data.token) {
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data));
+          setUser(res.data);
+          toast.success("Login successful!");
+          try {
+            window.dispatchEvent(new CustomEvent("user-login", { detail: { user: res.data } }));
+          } catch (e) {}
+          navigate("/dashboard");
+          return;
+        }
+      } catch (apiErr) {
+        console.warn("API login failed, checking local storage users...");
+      }
+
+      // If API login fails, check the stored users in local storage
+      const storedUsers = JSON.parse(localStorage.getItem("all_users")) || [];
+      const localUser = storedUsers.find(
         (u) => u.username === username && u.password === password
       );
 
       if (localUser) {
+        // Mock a token for local login
         const token = `local-${Date.now()}`;
         localStorage.setItem("token", token);
-        const userObj = { username: localUser.username };
+        // Include properties expected by the app
+        const userObj = { ...localUser, token };
         localStorage.setItem("user", JSON.stringify(userObj));
         setUser(userObj);
-        toast.success("Login successful (local)!");
+        toast.success("Login successful (from local storage)!");
         try {
           window.dispatchEvent(new CustomEvent("user-login", { detail: { user: userObj } }));
         } catch (e) {}
         navigate("/dashboard");
-        return;
-      }
-
-      // fallback to backend login if local user not found
-      const res = await axios.post("/auth/login", {
-        username,
-        password,
-        expiresInMins: 60,
-      });
-
-      if (res.data && res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        setUser(res.data.user);
-        toast.success("Login successful!");
-        try {
-          window.dispatchEvent(new CustomEvent("user-login", { detail: { user: res.data.user } }));
-        } catch (e) {}
-        navigate("/dashboard"); // redirect to dashboard
       } else {
-        toast.error("Login failed!");
+        toast.error("Invalid username or password");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Login failed!");
+      toast.error("An error occurred during login");
     } finally {
       setLoading(false);
     }
@@ -87,11 +111,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    // notify other parts of the app (e.g., ProductContext) to clear their in-memory state
+    
     try {
       window.dispatchEvent(new Event("user-logout"));
     } catch (e) {
-      // ignore if window isn't available
+      
     }
     navigate("/login");
     toast.success("Logged out successfully");
