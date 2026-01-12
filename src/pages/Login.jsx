@@ -27,7 +27,7 @@ const Login = () => {
       return;
     }
 
-    // delegate storage and auto-login to AuthContext.register
+    
     register(username, password);
   };
 

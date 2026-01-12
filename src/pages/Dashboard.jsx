@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // assumes you have login info saved here
+import { useAuth } from "../context/AuthContext"; 
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
@@ -11,7 +11,7 @@ const Dashboard = () => {
   const [editedTitle, setEditedTitle] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🧩 Load products from API
+  
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -26,12 +26,12 @@ const Dashboard = () => {
     }
   };
 
-  // 🔁 Fetch products when dashboard opens
+  
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // ➕ Add Product (API simulation)
+  
   const addProduct = async () => {
     if (!newTitle.trim()) return toast.error("Enter a product title");
 
@@ -41,7 +41,7 @@ const Dashboard = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newTitle,
-          /* You can include category, price, etc. */
+          
         }),
       });
 
@@ -55,7 +55,7 @@ const Dashboard = () => {
     }
   };
 
-  // 📝 Edit Product
+  
   const saveEdit = async () => {
     try {
       const res = await fetch(`https://dummyjson.com/products/${editingProduct.id}`, {
@@ -78,7 +78,7 @@ const Dashboard = () => {
     }
   };
 
-  // ❌ Delete Product
+  
   const deleteProduct = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
@@ -95,7 +95,7 @@ const Dashboard = () => {
     }
   };
 
-  // ⚙️ Edit Modal
+  
   const openEdit = (product) => {
     setEditingProduct(product);
     setEditedTitle(product.title);
@@ -162,7 +162,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
+      
       {editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow w-full max-w-sm">

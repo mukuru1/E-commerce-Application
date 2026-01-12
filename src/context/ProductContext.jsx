@@ -65,7 +65,7 @@ export const ProductProvider = ({ children }) => {
     fetchCategories();
   }, []);
 
-  // Listen for login/logout events to load the appropriate per-user storage
+  
   useEffect(() => {
     const handleLogin = (e) => {
       const user = (e && e.detail && e.detail.user) || getStoredUser();
@@ -74,7 +74,7 @@ export const ProductProvider = ({ children }) => {
     };
 
     const handleLogout = () => {
-      // on logout, load guest cart/wishlist (do not delete per-user storage)
+      
       setCart(loadCartFor(null));
       setWishlist(loadWishlistFor(null));
     };
