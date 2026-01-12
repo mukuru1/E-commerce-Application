@@ -1,60 +1,116 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useProduct } from "../context/ProductContext";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; // assumes you have login info saved here
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
-  const { products: allProducts, fetchProducts } = useProduct();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [products, setProducts] = useState([]);
   const [newTitle, setNewTitle] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // 🧩 Load products from API
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("https://dummyjson.com/products");
+      const data = await res.json();
+      setProducts(data.products || []);
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔁 Fetch products when dashboard opens
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("dashboardProducts")) || allProducts;
-    setProducts(stored);
-  }, [allProducts]);
+    fetchProducts();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem("dashboardProducts", JSON.stringify(products));
-  }, [products]);
+  // ➕ Add Product (API simulation)
+  const addProduct = async () => {
+    if (!newTitle.trim()) return toast.error("Enter a product title");
 
-  const addProduct = () => {
-    if (!newTitle) return;
-    const newProduct = { id: Date.now(), title: newTitle };
-    setProducts([newProduct, ...products]);
-    setNewTitle("");
+    try {
+      const res = await fetch("https://dummyjson.com/products/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTitle,
+          /* You can include category, price, etc. */
+        }),
+      });
+
+      const data = await res.json();
+      setProducts([data, ...products]);
+      setNewTitle("");
+      toast.success("Product added successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add product");
+    }
   };
 
-  const deleteProduct = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
+  // 📝 Edit Product
+  const saveEdit = async () => {
+    try {
+      const res = await fetch(`https://dummyjson.com/products/${editingProduct.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editedTitle }),
+      });
+
+      const updated = await res.json();
+
+      setProducts(
+        products.map((p) => (p.id === editingProduct.id ? updated : p))
+      );
+      setEditingProduct(null);
+      setEditedTitle("");
+      toast.success("Product updated!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update product");
+    }
   };
 
-  const openEdit = (p) => {
-    setEditingProduct(p);
-    setEditedTitle(p.title);
+  // ❌ Delete Product
+  const deleteProduct = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      await fetch(`https://dummyjson.com/products/${id}`, {
+        method: "DELETE",
+      });
+
+      setProducts(products.filter((p) => p.id !== id));
+      toast.success("Product deleted!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete product");
+    }
   };
 
-  const saveEdit = () => {
-    setProducts(
-      products.map((p) =>
-        p.id === editingProduct.id ? { ...p, title: editedTitle } : p
-      )
-    );
-    setEditingProduct(null);
-    setEditedTitle("");
+  // ⚙️ Edit Modal
+  const openEdit = (product) => {
+    setEditingProduct(product);
+    setEditedTitle(product.title);
   };
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
-      {/* Add Product */}
       {!isAuthenticated ? (
         <div className="mb-4">
           <p className="mb-2 text-red-600">You must be logged in to manage products.</p>
-          <Link to="/login" className="text-blue-600 hover:underline">Login to continue</Link>
+          <Link to="/login" className="text-blue-600 hover:underline">
+            Login to continue
+          </Link>
         </div>
       ) : (
         <div className="flex gap-2 mb-4">
@@ -74,34 +130,37 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Products */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map((p) => (
-          <div key={p.id} className="bg-white p-4 rounded shadow flex flex-col">
-            <h2 className="font-bold">{p.title}</h2>
-            <div className="mt-2 flex gap-2">
-              {isAuthenticated ? (
-                <>
-                  <button
-                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    onClick={() => openEdit(p)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                    onClick={() => deleteProduct(p.id)}
-                  >
-                    Delete
-                  </button>
-                </>
-              ) : (
-                <span className="text-sm text-gray-500">Login to edit</span>
-              )}
+      {loading ? (
+        <p>Loading products...</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {products.map((p) => (
+            <div key={p.id} className="bg-white p-4 rounded shadow flex flex-col">
+              <h2 className="font-bold text-lg mb-2">{p.title}</h2>
+              <div className="flex gap-2 mt-auto">
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                      onClick={() => openEdit(p)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      onClick={() => deleteProduct(p.id)}
+                    >
+                      Delete
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-500">Login to edit</span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editingProduct && (
