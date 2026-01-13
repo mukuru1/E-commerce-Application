@@ -12,11 +12,17 @@ const Dashboard = () => {
   const [editedTitle, setEditedTitle] = useState("");
   const [deletingProduct, setDeletingProduct] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (sortField = "", order = "asc") => {
     setLoading(true);
     try {
-      const res = await fetch("https://dummyjson.com/products");
+      let url = "https://dummyjson.com/products";
+      if (sortField) {
+        url += `?sortBy=${sortField}&order=${order}`;
+      }
+      const res = await fetch(url);
       const data = await res.json();
       setProducts(data.products || []);
     } catch (err) {
@@ -30,6 +36,21 @@ const Dashboard = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  useEffect(() => {
+    if (sortBy) {
+      fetchProducts(sortBy, sortOrder);
+    }
+  }, [sortBy, sortOrder]);
 
   const addProduct = async () => {
     if (!newTitle.trim()) return toast.error("Enter a product title");
@@ -131,6 +152,53 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Sort Products</h2>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => handleSort("rating")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                sortBy === "rating"
+                  ? "bg-cyan-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {sortBy === "rating" ? (sortOrder === "asc" ? "⬆ Rating" : "⬇ Rating") : "Rating"}
+            </button>
+            <button
+              onClick={() => handleSort("price")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                sortBy === "price"
+                  ? "bg-cyan-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {sortBy === "price" ? (sortOrder === "asc" ? "⬆ Price" : "⬇ Price") : "Price"}
+            </button>
+            <button
+              onClick={() => handleSort("title")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                sortBy === "title"
+                  ? "bg-cyan-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {sortBy === "title" ? (sortOrder === "asc" ? "⬆ Title (A-Z)" : "⬇ Title (Z-A)") : "Title"}
+            </button>
+            {sortBy && (
+              <button
+                onClick={() => {
+                  setSortBy("");
+                  setSortOrder("asc");
+                }}
+                className="px-4 py-2 rounded-lg font-medium bg-slate-400 text-white hover:bg-slate-500 transition-all duration-200"
+              >
+                Clear Sort
+              </button>
+            )}
+          </div>
+        </div>
 
         {loading ? (
           <div className="text-center py-12">
