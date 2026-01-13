@@ -148,26 +148,26 @@ const Dashboard = () => {
                 <div className="p-6 flex flex-col flex-1">
                   <h2 className="font-bold text-lg mb-4 text-slate-800 line-clamp-2 flex-1">{p.title}</h2>
                   <div className="flex gap-2">
-                    {isAuthenticated ? (
-                      <>
-                        <button
-                          className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
-                          onClick={() => openEdit(p)}
-                          title="Edit product"
-                        >
-                          <FiEdit size={18} />
-                        </button>
-                        <button
-                          className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
-                          onClick={() => deleteProduct(p.id)}
-                          title="Delete product"
-                        >
-                          <FiTrash size={18} />
-                        </button>
-                      </>
-                    ) : (
-                      <span className="text-sm text-slate-500 text-center w-full py-2">Login to edit</span>
-                    )}
+                  {isAuthenticated ? (
+                    <>
+                      <button
+                        className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
+                        onClick={() => openEdit(p)}
+                        title="Edit product"
+                      >
+                        <FiEdit size={18} />
+                      </button>
+                      <button
+                        className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
+                        onClick={() => deleteProduct(p.id)}
+                        title="Delete product"
+                      >
+                        <FiTrash size={18} />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-sm text-slate-500 text-center w-full py-2">Login to edit</span>
+                  )}
                   </div>
                 </div>
               </div>
