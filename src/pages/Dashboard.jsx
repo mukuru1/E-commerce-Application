@@ -10,9 +10,9 @@ const Dashboard = () => {
   const [newTitle, setNewTitle] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
+  const [deletingProduct, setDeletingProduct] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -27,12 +27,10 @@ const Dashboard = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  
   const addProduct = async () => {
     if (!newTitle.trim()) return toast.error("Enter a product title");
 
@@ -42,7 +40,6 @@ const Dashboard = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newTitle,
-          
         }),
       });
 
@@ -56,7 +53,6 @@ const Dashboard = () => {
     }
   };
 
-  
   const saveEdit = async () => {
     try {
       const res = await fetch(`https://dummyjson.com/products/${editingProduct.id}`, {
@@ -79,16 +75,14 @@ const Dashboard = () => {
     }
   };
 
-  
-  const deleteProduct = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-
+  const deleteProduct = async () => {
     try {
-      await fetch(`https://dummyjson.com/products/${id}`, {
+      await fetch(`https://dummyjson.com/products/${deletingProduct.id}`, {
         method: "DELETE",
       });
 
-      setProducts(products.filter((p) => p.id !== id));
+      setProducts(products.filter((p) => p.id !== deletingProduct.id));
+      setDeletingProduct(null);
       toast.success("Product deleted!");
     } catch (err) {
       console.error(err);
@@ -96,10 +90,13 @@ const Dashboard = () => {
     }
   };
 
-  
   const openEdit = (product) => {
     setEditingProduct(product);
     setEditedTitle(product.title);
+  };
+
+  const openDelete = (product) => {
+    setDeletingProduct(product);
   };
 
   return (
@@ -166,7 +163,7 @@ const Dashboard = () => {
                       </button>
                       <button
                         className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
-                        onClick={() => deleteProduct(p.id)}
+                        onClick={() => openDelete(p)}
                         title="Delete product"
                       >
                         <FiTrash size={18} />
@@ -204,6 +201,31 @@ const Dashboard = () => {
                   onClick={saveEdit}
                 >
                   Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {deletingProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+              <h2 className="text-2xl font-bold mb-6 text-slate-800">Delete Product</h2>
+              <p className="text-slate-600 mb-6">
+                Are you sure you want to delete <span className="font-semibold text-slate-800">{deletingProduct.title}</span>? This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  onClick={() => setDeletingProduct(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  onClick={deleteProduct}
+                >
+                  Delete
                 </button>
               </div>
             </div>
