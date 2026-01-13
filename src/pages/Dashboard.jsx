@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiEdit, FiTrash } from "react-icons/fi";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -120,6 +121,34 @@ const Dashboard = () => {
     setDeletingProduct(product);
   };
 
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(
+          <AiFillStar key={i} className="text-amber-400" size={16} />
+        );
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(
+          <div key={i} className="relative w-4 h-4">
+            <AiOutlineStar className="absolute text-amber-400" size={16} />
+            <div className="absolute overflow-hidden w-2 h-4">
+              <AiFillStar className="text-amber-400" size={16} />
+            </div>
+          </div>
+        );
+      } else {
+        stars.push(
+          <AiOutlineStar key={i} className="text-amber-400" size={16} />
+        );
+      }
+    }
+    return stars;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -218,8 +247,16 @@ const Dashboard = () => {
                   </div>
                 )}
                 <div className="p-6 flex flex-col flex-1">
-                  <h2 className="font-bold text-lg mb-4 text-slate-800 line-clamp-2 flex-1">{p.title}</h2>
-                  <div className="flex gap-2">
+                  <h2 className="font-bold text-lg mb-2 text-slate-800 line-clamp-2">{p.title}</h2>
+                  {p.rating && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="flex gap-0.5">
+                        {renderStars(p.rating)}
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700">{p.rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-2 flex-1">
                   {isAuthenticated ? (
                     <>
                       <button
