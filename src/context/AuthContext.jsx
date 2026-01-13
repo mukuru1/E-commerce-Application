@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch and store all users in local storage on mount
+ 
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
@@ -28,11 +28,12 @@ export const AuthProvider = ({ children }) => {
     fetchAllUsers();
   }, []);
 
+ 
   const login = async (username, password) => {
     setLoading(true);
     try {
-      // First, try to authenticate with DummyJSON API
       try {
+       
         const res = await axios.post("/auth/login", {
           username,
           password,
@@ -61,10 +62,9 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (localUser) {
-        
         const token = `local-${Date.now()}`;
         localStorage.setItem("token", token);
-      
+
         const userObj = { ...localUser, token };
         localStorage.setItem("user", JSON.stringify(userObj));
         setUser(userObj);
@@ -84,6 +84,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+ 
   const register = (username, password) => {
     const users = JSON.parse(localStorage.getItem("users")) || [];
     const exists = users.find((u) => u.username === username);
@@ -107,16 +108,26 @@ export const AuthProvider = ({ children }) => {
     navigate("/dashboard");
   };
 
+  
   const logout = () => {
+    
+    const dashboardData = localStorage.getItem("dashboardProducts");
+
+   
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
+
     
+    if (dashboardData) {
+      localStorage.setItem("dashboardProducts", dashboardData);
+    }
+
+    setUser(null);
+
     try {
       window.dispatchEvent(new Event("user-logout"));
-    } catch (e) {
-      
-    }
+    } catch (e) {}
+
     navigate("/login");
     toast.success("Logged out successfully");
   };
