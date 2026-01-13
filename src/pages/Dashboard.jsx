@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiEdit, FiTrash } from "react-icons/fi";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -10,12 +11,19 @@ const Dashboard = () => {
   const [newTitle, setNewTitle] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
+  const [deletingProduct, setDeletingProduct] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (sortField = "", order = "asc") => {
     setLoading(true);
     try {
-      const res = await fetch("https://dummyjson.com/products");
+      let url = "https://dummyjson.com/products";
+      if (sortField) {
+        url += `?sortBy=${sortField}&order=${order}`;
+      }
+      const res = await fetch(url);
       const data = await res.json();
       setProducts(data.products || []);
     } catch (err) {
@@ -29,6 +37,21 @@ const Dashboard = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  useEffect(() => {
+    if (sortBy) {
+      fetchProducts(sortBy, sortOrder);
+    }
+  }, [sortBy, sortOrder]);
 
   const addProduct = async () => {
     if (!newTitle.trim()) return toast.error("Enter a product title");
@@ -74,15 +97,14 @@ const Dashboard = () => {
     }
   };
 
-  const deleteProduct = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-
+  const deleteProduct = async () => {
     try {
-      await fetch(`https://dummyjson.com/products/${id}`, {
+      await fetch(`https://dummyjson.com/products/${deletingProduct.id}`, {
         method: "DELETE",
       });
 
-      setProducts(products.filter((p) => p.id !== id));
+      setProducts(products.filter((p) => p.id !== deletingProduct.id));
+      setDeletingProduct(null);
       toast.success("Product deleted!");
     } catch (err) {
       console.error(err);
@@ -93,6 +115,38 @@ const Dashboard = () => {
   const openEdit = (product) => {
     setEditingProduct(product);
     setEditedTitle(product.title);
+  };
+
+  const openDelete = (product) => {
+    setDeletingProduct(product);
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(
+          <AiFillStar key={i} className="text-amber-400" size={16} />
+        );
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(
+          <div key={i} className="relative w-4 h-4">
+            <AiOutlineStar className="absolute text-amber-400" size={16} />
+            <div className="absolute overflow-hidden w-2 h-4">
+              <AiFillStar className="text-amber-400" size={16} />
+            </div>
+          </div>
+        );
+      } else {
+        stars.push(
+          <AiOutlineStar key={i} className="text-amber-400" size={16} />
+        );
+      }
+    }
+    return stars;
   };
 
   return (
@@ -128,6 +182,53 @@ const Dashboard = () => {
           </div>
         )}
 
+        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4">Sort Products</h2>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => handleSort("rating")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                sortBy === "rating"
+                  ? "bg-cyan-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {sortBy === "rating" ? (sortOrder === "asc" ? "⬆ Rating" : "⬇ Rating") : "Rating"}
+            </button>
+            <button
+              onClick={() => handleSort("price")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                sortBy === "price"
+                  ? "bg-cyan-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {sortBy === "price" ? (sortOrder === "asc" ? "⬆ Price" : "⬇ Price") : "Price"}
+            </button>
+            <button
+              onClick={() => handleSort("title")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                sortBy === "title"
+                  ? "bg-cyan-500 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {sortBy === "title" ? (sortOrder === "asc" ? "⬆ Title (A-Z)" : "⬇ Title (Z-A)") : "Title"}
+            </button>
+            {sortBy && (
+              <button
+                onClick={() => {
+                  setSortBy("");
+                  setSortOrder("asc");
+                }}
+                className="px-4 py-2 rounded-lg font-medium bg-slate-400 text-white hover:bg-slate-500 transition-all duration-200"
+              >
+                Clear Sort
+              </button>
+            )}
+          </div>
+        </div>
+
         {loading ? (
           <div className="text-center py-12">
             <p className="text-slate-600 font-medium">Loading products...</p>
@@ -146,8 +247,16 @@ const Dashboard = () => {
                   </div>
                 )}
                 <div className="p-6 flex flex-col flex-1">
-                  <h2 className="font-bold text-lg mb-4 text-slate-800 line-clamp-2 flex-1">{p.title}</h2>
-                  <div className="flex gap-2">
+                  <h2 className="font-bold text-lg mb-2 text-slate-800 line-clamp-2">{p.title}</h2>
+                  {p.rating && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="flex gap-0.5">
+                        {renderStars(p.rating)}
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700">{p.rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-2 flex-1">
                   {isAuthenticated ? (
                     <>
                       <button
@@ -159,7 +268,7 @@ const Dashboard = () => {
                       </button>
                       <button
                         className="flex-1 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
-                        onClick={() => deleteProduct(p.id)}
+                        onClick={() => openDelete(p)}
                         title="Delete product"
                       >
                         <FiTrash size={18} />
@@ -197,6 +306,31 @@ const Dashboard = () => {
                   onClick={saveEdit}
                 >
                   Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {deletingProduct && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+              <h2 className="text-2xl font-bold mb-6 text-slate-800">Delete Product</h2>
+              <p className="text-slate-600 mb-6">
+                Are you sure you want to delete <span className="font-semibold text-slate-800">{deletingProduct.title}</span>? This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  onClick={() => setDeletingProduct(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  onClick={deleteProduct}
+                >
+                  Delete
                 </button>
               </div>
             </div>

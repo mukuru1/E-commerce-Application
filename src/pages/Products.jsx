@@ -1,4 +1,33 @@
 import { useProduct } from "../context/ProductContext";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
+
+const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 !== 0;
+
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(
+        <AiFillStar key={i} className="text-amber-400" size={16} />
+      );
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(
+        <div key={i} className="relative w-4 h-4">
+          <AiOutlineStar className="absolute text-amber-400" size={16} />
+          <div className="absolute overflow-hidden w-2 h-4">
+            <AiFillStar className="text-amber-400" size={16} />
+          </div>
+        </div>
+      );
+    } else {
+      stars.push(
+        <AiOutlineStar key={i} className="text-amber-400" size={16} />
+      );
+    }
+  }
+  return stars;
+};
 
 const Products = () => {
   const {
@@ -92,6 +121,14 @@ const Products = () => {
               </div>
               <div className="p-5">
                 <h2 className="text-lg font-bold text-slate-800 truncate mb-2">{product.title}</h2>
+                {product.rating && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex gap-0.5">
+                      {renderStars(product.rating)}
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">{product.rating.toFixed(1)}</span>
+                  </div>
+                )}
                 <p className="text-2xl font-bold text-cyan-600 mb-4">${product.price}</p>
                 <div className="flex gap-2">
                   <button
